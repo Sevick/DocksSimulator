@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.effect.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="642.0" prefWidth="880.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.fbytes.docksimulator.controller.DocksGraphController">
+
+   <children>
+      <HBox alignment="BOTTOM_CENTER" prefHeight="486.0" prefWidth="657.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <VBox HBox.hgrow="ALWAYS">
+               <children>
+                  <HBox alignment="TOP_CENTER" VBox.vgrow="NEVER">
+                     <children>
+                        <Label text="Ships in queue:">
+                           <font>
+                              <Font size="18.0" />
+                           </font>
+                        </Label>
+                        <Label fx:id="shipsInQueueLabel" alignment="CENTER_RIGHT" prefHeight="27.0" prefWidth="52.0" text="0">
+                           <font>
+                              <Font size="18.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </HBox>
+                  <SplitPane dividerPositions="0.5" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0" VBox.vgrow="ALWAYS">
+                    <items>
+                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="105.0" prefWidth="616.0">
+                           <children>
+                              <BarChart fx:id="docksChart" animated="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                <xAxis>
+                                  <CategoryAxis side="BOTTOM" tickLabelsVisible="false" />
+                                </xAxis>
+                                <yAxis>
+                                  <NumberAxis minorTickVisible="false" side="LEFT" />
+                                </yAxis>
+                              </BarChart>
+                           </children>
+                        </AnchorPane>
+                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                           <children>
+                                    <LineChart fx:id="seaPortChart" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" AnchorPane.bottomAnchor="-1.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                      <xAxis>
+                                        <CategoryAxis prefHeight="27.0" side="BOTTOM" />
+                                      </xAxis>
+                                      <yAxis>
+                                        <NumberAxis side="LEFT" />
+                                      </yAxis>
+                                    </LineChart>
+                           </children>
+                        </AnchorPane>
+                    </items>
+                  </SplitPane>
+               </children>
+            </VBox>
+            <Separator orientation="VERTICAL" prefHeight="200.0" />
+            <VBox prefHeight="585.0" prefWidth="237.0" HBox.hgrow="NEVER">
+               <children>
+                  <BorderPane prefHeight="833.0" prefWidth="237.0" VBox.vgrow="ALWAYS">
+                     <bottom>
+                      <Button fx:id="exitButton" mnemonicParsing="false" text="Exit" BorderPane.alignment="CENTER">
+                           <BorderPane.margin>
+                              <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                           </BorderPane.margin>
+                        </Button>
+                     </bottom>
+                     <top>
+                        <VBox alignment="TOP_CENTER" prefHeight="298.0" prefWidth="237.0" spacing="10.0" BorderPane.alignment="CENTER">
+                           <children>
+                              <VBox alignment="CENTER" prefHeight="266.0" prefWidth="227.0" spacing="5.0" style="-fx-border-color: black;">
+                                 <children>
+                                    <GridPane>
+                                       <columnConstraints>
+                                          <ColumnConstraints hgrow="SOMETIMES" maxWidth="198.0" minWidth="10.0" prefWidth="182.0" />
+                                          <ColumnConstraints hgrow="SOMETIMES" maxWidth="87.0" minWidth="10.0" prefWidth="45.0" />
+                                       </columnConstraints>
+                                       <rowConstraints>
+                                          <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                                          <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                                          <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                                          <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                                          <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                                          <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                                          <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                                       </rowConstraints>
+                                       <children>
+                                          <Slider fx:id="shipDelaySelector" blockIncrement="100.0" majorTickUnit="100.0" max="1000.0" minorTickCount="10" showTickMarks="true" value="100.0" GridPane.rowIndex="3">
+                                             <padding>
+                                                <Insets bottom="10.0" top="10.0" />
+                                             </padding>
+                                          </Slider>
+                                          <Label text="Delay between ships arrival" GridPane.rowIndex="2">
+                                             <GridPane.margin>
+                                                <Insets bottom="10.0" top="10.0" />
+                                             </GridPane.margin>
+                                          </Label>
+                                          <Label text="Number of docks">
+                                             <GridPane.margin>
+                                                <Insets bottom="10.0" top="10.0" />
+                                             </GridPane.margin></Label>
+                                          <Slider fx:id="docksCountSelector" min="2.0" showTickMarks="true" value="20.0" GridPane.rowIndex="1">
+                                             <padding>
+                                                <Insets bottom="10.0" top="10.0" />
+                                             </padding>
+                                          </Slider>
+                                          <Label fx:id="docksCountLabel" alignment="CENTER" prefWidth="77.0" text="20" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                             <padding>
+                                                <Insets bottom="10.0" top="10.0" />
+                                             </padding></Label>
+                                          <Label fx:id="shipDelayLabel" alignment="CENTER" prefWidth="77.0" text="100" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                                             <GridPane.margin>
+                                                <Insets bottom="10.0" top="10.0" />
+                                             </GridPane.margin></Label>
+                                          <Label text="Discharge delay in docks" GridPane.rowIndex="4">
+                                             <GridPane.margin>
+                                                <Insets bottom="10.0" top="10.0" />
+                                             </GridPane.margin>
+                                          </Label>
+                                          <Slider fx:id="dischargeDelaySelector" blockIncrement="50.0" majorTickUnit="50.0" max="500.0" minorTickCount="10" showTickMarks="true" value="100.0" GridPane.rowIndex="5">
+                                             <padding>
+                                                <Insets bottom="10.0" top="10.0" />
+                                             </padding>
+                                          </Slider>
+                                          <Label fx:id="dischargeDelayLabel" alignment="CENTER" prefHeight="13.0" prefWidth="39.0" text="100" GridPane.columnIndex="1" GridPane.rowIndex="5">
+                                             <padding>
+                                                <Insets bottom="10.0" top="10.0" />
+                                             </padding>
+                                          </Label>
+                                       </children>
+                                       <padding>
+                                          <Insets left="5.0" right="5.0" />
+                                       </padding>
+                                    </GridPane>
+                                  <Button fx:id="runSimulationButton" mnemonicParsing="false" text="Run simulation" />
+                                    <Button fx:id="stopSimulationButton" mnemonicParsing="false" text="Stop simulation" />
+                                 </children>
+                                 <padding>
+                                    <Insets bottom="10.0" />
+                                 </padding>
+                              </VBox>
+                           </children>
+                           <padding>
+                              <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                           </padding>
+                        </VBox>
+                     </top>
+                     <center>
+                        <ToggleButton fx:id="toggleShipProduction" mnemonicParsing="false" prefHeight="25.0" prefWidth="134.0" selected="true" text="Ships production" BorderPane.alignment="CENTER" />
+                     </center>
+                  </BorderPane>
+                  <VBox prefHeight="200.0" prefWidth="100.0" spacing="10.0">
+                     <padding>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </padding>
+                  </VBox>
+               </children>
+            </VBox>
+         </children>
+      </HBox>
+   </children>
+</AnchorPane>

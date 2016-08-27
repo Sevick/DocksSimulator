@@ -29,8 +29,7 @@ public class Dock implements Callable<String>{
         public int totalDischargedShips=0;
         public int currentShipWeightLeft=0;
         public int currentDischargeRate=0;
-        public int dischargePerformance;
-
+        public int dischargePerformance=0;
     }
     DockStats dockStats=new DockStats();
 
@@ -68,7 +67,7 @@ public class Dock implements Callable<String>{
         Thread dockThread = Thread.currentThread();
         dockThread.setName("Dock#"+id);
 
-        log.debug("Dock#"+id+" is running dischargeDelay="+dischargeDelay);
+        log.info("Dock#"+id+" is running with dischargeDelay="+dischargeDelay);
         while (true) {
             if (currentCargo==null) {
                 log.debug("Dock#"+id+" is requesting next cargo from dispatcher");
@@ -78,7 +77,7 @@ public class Dock implements Callable<String>{
             try {
                 sleep(dischargeDelay);
             } catch (InterruptedException e) {
-                log.debug("Dock#"+id+" stopped");
+                log.info("Dock#"+id+" stopped");
                 break;
             }
             log.debug("Dock#"+id+" is discharging the ship#"+currentCargo.getId()+"   "+currentCargo.getCurrentLoad()+"/"+currentCargo.getMaxLoad()+ "  discharge rate="+currentDischargeRate+"("+dischargePerformance+")");

@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="DocksSimulator:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/DocksSimulator_jar</output-path>
+    <root id="archive" name="DocksSimulator.jar">
+      <element id="module-output" name="DocksSimulator" />
+    </root>
+  </artifact>
+</component>

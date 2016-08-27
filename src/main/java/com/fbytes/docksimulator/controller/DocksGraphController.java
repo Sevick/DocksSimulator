@@ -174,12 +174,12 @@ public class DocksGraphController implements Initializable {
     public void updateStats() {
         try {
             CargoProducer.CargoProducerStats cargoProducerStats = statsProducer.getCargoProducerStats();
-            SeaPort.DispatcherStats dispatcherStats = statsProducer.getSeaPosrtStat();
+            SeaPort.SeaPortStats seaPortStats = statsProducer.getSeaPortStats();
 
             Platform.runLater(new Runnable() {
                 @Override
                 public void run() {
-                    shipsInQueueLabel.setText(String.valueOf(dispatcherStats.queueLength));
+                    shipsInQueueLabel.setText(String.valueOf(seaPortStats.queueLength));
 
                     XYChart.Series seriesGraphDischargeRate = new XYChart.Series();
                     seriesGraphDischargeRate.setName("DischargeRate");
@@ -187,14 +187,14 @@ public class DocksGraphController implements Initializable {
                     XYChart.Series seriesGraphDischargeLeft = new XYChart.Series();
                     seriesGraphDischargeLeft.setName("DischargeLeft");
 
-                    for (Dock.DockStats curDockStat : dispatcherStats.dockStatses) {
+                    for (Dock.DockStats curDockStat : seaPortStats.dockStatses) {
                         seriesGraphDischargeRate.getData().add(new XYChart.Data("Dock#" + curDockStat.id, curDockStat.currentDischargeRate));
                         seriesGraphDischargeLeft.getData().add(new XYChart.Data("Dock#" + curDockStat.id, curDockStat.currentShipWeightLeft));
                     }
                     docksChart.getData().setAll(seriesGraphDischargeRate, seriesGraphDischargeLeft);
 
                     int timeDelta = (int) java.time.Duration.between(startTime, LocalTime.now()).getSeconds();
-                    seriesTotalShipsDischarged.getData().add(new XYChart.Data(String.valueOf(timeDelta), (int) dispatcherStats.totalShipsDischarged));
+                    seriesTotalShipsDischarged.getData().add(new XYChart.Data(String.valueOf(timeDelta), (int) seaPortStats.totalShipsDischarged));
                     //log.debug("totalShipsDischarged=" + dispatcherStats.totalShipsDischarged);
                 }
             });

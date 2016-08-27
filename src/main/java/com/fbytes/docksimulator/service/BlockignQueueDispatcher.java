@@ -1,20 +1,21 @@
 package com.fbytes.docksimulator.service;
 
 import com.fbytes.docksimulator.model.Cargo;
-import com.fbytes.docksimulator.model.Dock;
 import org.apache.log4j.Logger;
 
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 /**
  * Created by S on 27.08.2016.
  */
 public class BlockignQueueDispatcher implements Dispatcher {
+    final static int MAX_SHIPS_IN_QUEUE=50;
 
     Logger log=Logger.getLogger(this.getClass());
-    DispatcherStats dispatcherStats;
+    DispatcherStats dispatcherStats=new DispatcherStats();
 
-    BlockingQueue<Cargo> shipQueue;
+    BlockingQueue<Cargo> shipQueue=new ArrayBlockingQueue<>(MAX_SHIPS_IN_QUEUE);
 
     @Override
     public Cargo getNextCargo() {
@@ -32,6 +33,7 @@ public class BlockignQueueDispatcher implements Dispatcher {
 
     @Override
     public void addCargoToQueue(Cargo newCargo) {
+        log.debug("Thread "+Thread.currentThread().getName()+"  adding cargo to queue");
         try {
             shipQueue.put(newCargo);
         } catch (InterruptedException e) {

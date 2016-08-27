@@ -13,9 +13,9 @@ public class DocksSimulator implements StatsProducer {
 
     Logger log=Logger.getLogger(this.getClass());
 
-    private int docksCount=20;
-    private int shipDelay=50;
-    private int dischargeDelay=100;
+    private int docksCount=5;
+    private int shipDelay=400;
+    private int dischargeDelay=200;
 
     SeaPort seaPort=new SeaPort();
     CargoProducer cargoProducer=new CargoProducer();
@@ -24,8 +24,8 @@ public class DocksSimulator implements StatsProducer {
     //SeaPort.DispatcherStats seaPortStats;
 
     @Override
-    public SeaPort.DispatcherStats getSeaPosrtStat() {
-        return  seaPort.getDispatcherStats();
+    public SeaPort.SeaPortStats getSeaPortStats() {
+        return  seaPort.getSeaPortStats();
     }
 
     @Override

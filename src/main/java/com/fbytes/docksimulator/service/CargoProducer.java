@@ -2,6 +2,7 @@ package com.fbytes.docksimulator.service;
 
 
 import com.fbytes.docksimulator.model.Ship;
+import com.fbytes.docksimulator.service.dispatcher.CargoDispatcher;
 import org.apache.log4j.Logger;
 
 import java.util.Random;
@@ -31,8 +32,8 @@ public class CargoProducer {
     private ScheduledExecutorService scheduler;
 
     public class CargoProducerStats{
-        volatile long totalCargoWeightProduced=0;
-        volatile long totalShipsProduced=0;
+        public volatile long totalCargoWeightProduced=0;
+        public volatile long totalShipsProduced=0;
 
     }
     CargoProducerStats cargoProducerStats=new CargoProducerStats();
@@ -40,14 +41,19 @@ public class CargoProducer {
 
     //---------------------------------------------------------------------------------------
     public void start(){
+        cargoProducerStats=new CargoProducerStats();
         scheduler = Executors.newScheduledThreadPool(1);
 
-        Runnable genCargp=()-> {Thread.currentThread().setName("Cargo producer"); dispatcher.addCargoToQueue(getRandomShip());};
+        Runnable genCargp=()-> {Thread.currentThread().setName("Cargo producer"); log.debug("Sheduled ship generation");dispatcher.addCargoToQueue(getRandomShip());};
         scheduler.scheduleAtFixedRate(genCargp, 0, delay, TimeUnit.MILLISECONDS);
     }
     public void stop() {
         if (scheduler!=null)
             scheduler.shutdown();
+    }
+
+    public void reset(){
+        cargoProducerStats=new CargoProducerStats();
     }
 
 

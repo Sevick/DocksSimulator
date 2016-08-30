@@ -10,24 +10,23 @@ import java.util.Queue;
  * Created by S on 27.08.2016.
  */
 public class SynchronizedBlockDispatcher implements CargoDispatcher {
-    Logger log=Logger.getLogger(this.getClass());
-    DispatcherStats dispatcherStats=new DispatcherStats();
+    Logger log = Logger.getLogger(this.getClass());
+    DispatcherStats dispatcherStats = new DispatcherStats();
 
-    Queue<Cargo> shipQueue=new LinkedList<Cargo>();
-    Object queueLocker=new Object();
+    Queue<Cargo> shipQueue = new LinkedList<Cargo>();
 
     @Override
-    synchronized public Cargo getNextCargo() {
-        log.debug("Thread "+Thread.currentThread().getName()+"  requested getNextCargo");
-        dispatcherStats.totalCargoRequests++;
-        Cargo nextCargo=null;
+    public Cargo getNextCargo() {
+        log.debug("Thread " + Thread.currentThread().getName() + "  requested getNextCargo");
+        Cargo nextCargo = null;
 
-synchronized (this) {
-    log.debug("Thread " + Thread.currentThread().getName() + "  polling shipQueue");
-    nextCargo = shipQueue.poll();
-    log.debug("Thread " + Thread.currentThread().getName() + " first poll returns nextCargo=" + nextCargo);
-    //shipQueue.notifyAll();
-}
+        synchronized (this) {
+            dispatcherStats.totalCargoRequests++;
+            log.debug("Thread " + Thread.currentThread().getName() + "  polling shipQueue");
+            nextCargo = shipQueue.poll();
+            log.debug("Thread " + Thread.currentThread().getName() + " first poll returns nextCargo=" + nextCargo);
+            //shipQueue.notifyAll();
+
 
             while (nextCargo == null) {
                 log.debug("Thread " + Thread.currentThread().getName() + "  got null nextCargo");
@@ -36,23 +35,20 @@ synchronized (this) {
                     log.debug("Thread " + Thread.currentThread().getName() + "  is now waiting on shipQueue");
                     wait();
                     log.debug("Thread " + Thread.currentThread().getName() + "  exits from wait on shipQueue");
-                    synchronized (this) {
-                        nextCargo = shipQueue.poll();
-                        //shipQueue.notifyAll();
-                    }
-
+                    nextCargo = shipQueue.poll();
+                    notifyAll();
                 } catch (InterruptedException e) {
                     log.debug("Wait interrupted");
                     break;
                 }
             }
-
+        }
         return nextCargo;
     }
 
     @Override
     public void addCargoToQueue(Cargo newCargo) {
-        log.debug("Add cargo request from thread: "+Thread.currentThread().getName());
+        log.debug("Add cargo request from thread: " + Thread.currentThread().getName());
         synchronized (this) {
             shipQueue.add(newCargo);
             log.debug("Cargo added to queue");
@@ -68,7 +64,7 @@ synchronized (this) {
 
     @Override
     public void getStats(DispatcherStats statsToUpdate) {
-        statsToUpdate.queueLength=shipQueue.size();
+        statsToUpdate.queueLength = shipQueue.size();
     }
 
     @Override

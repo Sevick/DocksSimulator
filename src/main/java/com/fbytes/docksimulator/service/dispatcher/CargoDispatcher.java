@@ -18,4 +18,5 @@ abstract public interface CargoDispatcher {
     public void addCargoToQueue(Cargo newCargo);
     public int getQueueLength();
     public void getStats(DispatcherStats statsToUpdate);
+    public void resetQueue();
 }

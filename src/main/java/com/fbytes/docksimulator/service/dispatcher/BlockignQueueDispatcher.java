@@ -9,7 +9,7 @@ import java.util.concurrent.BlockingQueue;
 /**
  * Created by S on 27.08.2016.
  */
-public class BlockignQueueDispatcher implements Dispatcher {
+public class BlockignQueueDispatcher implements CargoDispatcher {
     final static int MAX_SHIPS_IN_QUEUE=50;
 
     Logger log=Logger.getLogger(this.getClass());
@@ -49,5 +49,10 @@ public class BlockignQueueDispatcher implements Dispatcher {
     @Override
     public void getStats(DispatcherStats statsToUpdate) {
         statsToUpdate.queueLength=shipQueue.size();
+    }
+
+    @Override
+    public void resetQueue() {
+        shipQueue.clear();
     }
 }

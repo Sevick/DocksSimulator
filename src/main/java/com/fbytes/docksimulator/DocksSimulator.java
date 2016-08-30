@@ -39,7 +39,7 @@ public class DocksSimulator implements StatsProducer {
         this.shipDelay=shipDelay;
         this.dischargeDelay=dischargeDelay;
         seaPort.initialize(docksCount, dischargeDelay);
-        cargoProducer.initialize(seaPort,shipDelay);
+        cargoProducer.initialize(seaPort.getDispatcher(),shipDelay);
 
     }
 
@@ -61,4 +61,12 @@ public class DocksSimulator implements StatsProducer {
     public void startSimulator() {
         startShipsProduction();
     }
+
+
+    public void simulateExceptionInOneDock(){
+        if (seaPort!=null)
+            seaPort.simulateExceptionInOneDock();
+    }
+
+
 }

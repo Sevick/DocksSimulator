@@ -13,20 +13,21 @@ import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.chart.BarChart;
-import javafx.scene.chart.LineChart;
-import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.XYChart;
+import javafx.scene.chart.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.paint.Color;
 import javafx.util.Duration;
 import org.apache.log4j.Logger;
 
 import java.net.URL;
 import java.time.LocalTime;
 import java.util.ResourceBundle;
+
+import static java.lang.Thread.sleep;
 
 
 public class DocksGraphController implements Initializable {
@@ -37,6 +38,8 @@ public class DocksGraphController implements Initializable {
 
     ObservableList<XYChart.Series<Integer, Integer>> lineChartData = FXCollections.observableArrayList();
     LineChart.Series<Integer, Integer> seriesTotalShipsDischarged = new LineChart.Series<>();
+    LineChart.Series<Integer, Integer> seriesTotalShipsProduced = new LineChart.Series<>();
+    LineChart.Series<Integer, Integer> seriesQueueLength = new LineChart.Series<>();
     LocalTime startTime;
 
 
@@ -72,16 +75,37 @@ public class DocksGraphController implements Initializable {
     @FXML
     private LineChart seaPortChart;
 
+    @FXML
+    private LineChart shipsInQueueChart;
+
+
+    @FXML
+    private Button buttonDockException;
+
 
     StatsProducer statsProducer;
     DocksSimulator docksSimulator;
 
     ScheduledService<Void> uiUpdateScheduler;
+    Thread uiUpdateThread;
 
 
     public DocksGraphController() {
         startTime = LocalTime.now();
     }
+
+    protected void disableParameterChanges(){
+        docksCountSelector.setDisable(true);
+        shipDelaySelector.setDisable(true);
+        dischargeDelaySelector.setDisable(true);
+    }
+
+    protected void enableParameterChanges(){
+        docksCountSelector.setDisable(false);
+        shipDelaySelector.setDisable(false);
+        dischargeDelaySelector.setDisable(false);
+    }
+
 
     @FXML
     @Override // This method is called by the FXMLLoader when initialization is complete
@@ -99,7 +123,8 @@ public class DocksGraphController implements Initializable {
             docksSimulator.initSimulator(getDockCount(), getShipDelay(), getDischargeDelay());
             docksSimulator.startSimulator();
             setStatsProducer(docksSimulator);
-            reset();
+            disableParameterChanges();
+            //reset();
             startUIupdates();
         });
 
@@ -107,6 +132,7 @@ public class DocksGraphController implements Initializable {
         stopSimulationButton.setOnAction((event) -> {
             log.debug("stopSimulationButton button pressed");
             docksSimulator.stopSimulator();
+            enableParameterChanges();
             stopUIupdates();
         });
 
@@ -118,6 +144,12 @@ public class DocksGraphController implements Initializable {
             } else {
                 docksSimulator.stopShipsProduction();
             }
+        });
+
+
+        buttonDockException.setOnAction((event) -> {
+            log.debug("buttonDockException button pressed");
+            docksSimulator.simulateExceptionInOneDock();
         });
 
 
@@ -142,10 +174,23 @@ public class DocksGraphController implements Initializable {
         docksChart.setCache(true);
 
         seriesTotalShipsDischarged.setName("totalShipsDischarged");
-        seaPortChart.getData().setAll(seriesTotalShipsDischarged);
+        seriesTotalShipsProduced.setName("totalShipsProduced");
+        seaPortChart.getData().setAll(seriesTotalShipsDischarged,seriesTotalShipsProduced);
+
 
         seaPortChart.setCreateSymbols(false);
         seaPortChart.setCache(true);
+
+        shipsInQueueChart.getData().setAll(seriesQueueLength);
+        ((NumberAxis)shipsInQueueChart.getYAxis()).setForceZeroInRange(false);
+
+/*
+        DropShadow ds = new DropShadow();
+        ds.setOffsetY(3.0);
+        ds.setOffsetX(3.0);
+        ds.setColor(Color.GRAY);
+        seaPortChart.setEffect(ds);
+*/
 
 
     }
@@ -153,7 +198,7 @@ public class DocksGraphController implements Initializable {
 
     protected void reset(){
         seriesTotalShipsDischarged.getData().clear();
-        seaPortChart.getYAxis().setAutoRanging(true);
+        seriesTotalShipsProduced.getData().clear();
     }
 
 
@@ -195,6 +240,12 @@ public class DocksGraphController implements Initializable {
 
                     int timeDelta = (int) java.time.Duration.between(startTime, LocalTime.now()).getSeconds();
                     seriesTotalShipsDischarged.getData().add(new XYChart.Data(String.valueOf(timeDelta), (int) seaPortStats.totalShipsDischarged));
+                    seriesTotalShipsProduced.getData().add(new XYChart.Data(String.valueOf(timeDelta), (int) cargoProducerStats.totalShipsProduced));
+
+                    if (seriesQueueLength.getData().size()>50)
+                        seriesQueueLength.getData().remove(0);
+                    seriesQueueLength.getData().add(new XYChart.Data(String.valueOf(timeDelta), (int) seaPortStats.queueLength));
+
                     //log.debug("totalShipsDischarged=" + dispatcherStats.totalShipsDischarged);
                 }
             });
@@ -209,11 +260,11 @@ public class DocksGraphController implements Initializable {
 
     public void startUIupdates() {
         log.debug("Starting UI updates service");
-        uiUpdateScheduler = new ScheduledService<Void>() {
+/*        uiUpdateScheduler = new ScheduledService<Void>() {
             protected Task<Void> createTask() {
                 return new Task<Void>() {
                     protected Void call() {
-                        Thread.currentThread().setName("UI update");
+                        Thread.currentThread().setName("UIupdate");
                         updateStats();
                         return null;
                     }
@@ -221,12 +272,40 @@ public class DocksGraphController implements Initializable {
             }
         };
         uiUpdateScheduler.setPeriod(Duration.millis(uiUpdateDelay));
-        uiUpdateScheduler.start();
+        uiUpdateScheduler.start();*/
+
+
+        Task uiUpdateTask=new Task<Void>() {
+                protected Void call() {
+                    Thread.currentThread().setName("UIupdate");
+                    while(true) {
+                        updateStats();
+                        try {
+                            sleep(uiUpdateDelay);
+                        } catch (InterruptedException e) {
+                            break;
+                        }
+                    }
+                    return null;
+                }
+        };
+
+        uiUpdateThread=new Thread(uiUpdateTask);
+        uiUpdateThread.start();
+
+        log.info("UIupdate thread started");
     }
 
+
+
+
+
     public void stopUIupdates(){
-        if (uiUpdateScheduler!=null)
-            uiUpdateScheduler.cancel();
+/*        if (uiUpdateScheduler!=null)
+            uiUpdateScheduler.cancel();*/
+
+        if (uiUpdateThread!=null)
+            uiUpdateThread.interrupt();
     }
 
 

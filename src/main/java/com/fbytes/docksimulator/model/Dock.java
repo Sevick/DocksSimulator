@@ -1,6 +1,6 @@
 package com.fbytes.docksimulator.model;
 
-import com.fbytes.docksimulator.service.CargoDispatcher;
+import com.fbytes.docksimulator.service.dispatcher.CargoDispatcher;
 import org.apache.log4j.Logger;
 
 import java.util.concurrent.Callable;
@@ -22,6 +22,8 @@ public class Dock implements Callable<String>{
     private int dischargeDelay;
     private CargoDispatcher cargoDispatcher;
     private Cargo currentCargo;
+
+    private boolean exceptionRequested=false;
 
     public class DockStats{
         public int id;
@@ -50,14 +52,15 @@ public class Dock implements Callable<String>{
         return  dockStats;
     }
 
-
     public Dock(int id, CargoDispatcher cargoDispatcher, int dischargePerformance, int dischargeDelay) {
         this.dischargePerformance = dischargePerformance;
         this.cargoDispatcher = cargoDispatcher;
         this.id=id;
         this.dischargeDelay=dischargeDelay;
+    }
 
-
+    public void requestException(){
+        exceptionRequested=true;
     }
 
 
@@ -89,6 +92,9 @@ public class Dock implements Callable<String>{
                 currentDischargeRate=0;
             }
             dockStats.totalDischargedWeight+=currentDischargeRate;
+
+            if (exceptionRequested)
+                throw new Exception("Dock#"+id+" throws exception as requested by user");
             yield();
         }
         return "";

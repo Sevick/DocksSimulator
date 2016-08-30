@@ -1,4 +1,4 @@
-package com.fbytes.docksimulator.service;
+package com.fbytes.docksimulator.service.dispatcher;
 
 import com.fbytes.docksimulator.model.Cargo;
 
@@ -6,7 +6,7 @@ import com.fbytes.docksimulator.model.Cargo;
 /**
  * Created by S on 27.08.2016.
  */
-public interface Dispatcher {
+abstract public interface CargoDispatcher {
 
     public class DispatcherStats {
         public int queueLength=0;

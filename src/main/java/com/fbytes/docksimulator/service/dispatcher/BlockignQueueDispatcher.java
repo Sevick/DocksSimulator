@@ -1,4 +1,4 @@
-package com.fbytes.docksimulator.service;
+package com.fbytes.docksimulator.service.dispatcher;
 
 import com.fbytes.docksimulator.model.Cargo;
 import org.apache.log4j.Logger;

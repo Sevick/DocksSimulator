@@ -1,8 +1,10 @@
 package com.fbytes.docksimulator.model;
 
+import com.fbytes.docksimulator.stats.DataCollector;
 import com.fbytes.docksimulator.service.dispatcher.CargoDispatcher;
 import org.apache.log4j.Logger;
 
+import java.time.LocalDateTime;
 import java.util.concurrent.Callable;
 
 import static java.lang.Thread.sleep;
@@ -13,7 +15,8 @@ import static java.lang.Thread.yield;
  */
 public class Dock implements Callable<String>{
 
-    Logger log=Logger.getLogger(this.getClass());
+    final Logger log=Logger.getLogger(this.getClass());
+    DataCollector dataCollector=DataCollector.getInstance();
 
     private int id;
     private int currentDischargeRate=0;
@@ -64,6 +67,13 @@ public class Dock implements Callable<String>{
     }
 
 
+    protected void sendDataToCollector(){
+        if (currentCargo==null)
+            dataCollector.addData(LocalDateTime.now(),id,-1,-1);
+        else
+            dataCollector.addData(LocalDateTime.now(),id,currentCargo.getId(),currentCargo.getCurrentLoad());
+    }
+
     @Override
     public String call() throws Exception {
 
@@ -75,7 +85,12 @@ public class Dock implements Callable<String>{
             if (currentCargo==null) {
                 log.debug("Dock#"+id+" is requesting next cargo from dispatcher");
                 currentCargo = cargoDispatcher.getNextCargo();
+                if (currentCargo==null) {
+                    log.error("Dispatcher returned null cargo");
+                    break;
+                }
                 currentDischargeRate = currentCargo.getDischargePerformanceLimit() < dischargePerformance ? currentCargo.getDischargePerformanceLimit() : dischargePerformance;
+                sendDataToCollector();
             }
             try {
                 sleep(dischargeDelay);
@@ -84,7 +99,10 @@ public class Dock implements Callable<String>{
                 break;
             }
             log.debug("Dock#"+id+" is discharging the ship#"+currentCargo.getId()+"   "+currentCargo.getCurrentLoad()+"/"+currentCargo.getMaxLoad()+ "  discharge rate="+currentDischargeRate+"("+dischargePerformance+")");
-            if (!currentCargo.discharge(currentDischargeRate)) {
+
+            boolean shipEmpty=!currentCargo.discharge(currentDischargeRate);
+            sendDataToCollector();
+            if (shipEmpty) {
                 // Ship is done. Request for next ship
                 log.debug("Dock#"+id+" discharged the ship#"+currentCargo.getId());
                 dockStats.totalDischargedShips++;

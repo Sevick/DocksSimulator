@@ -11,7 +11,8 @@ public class Ship implements Cargo{
     private int currentLoad;
     private int dischargePerformanceLimit;
 
-    public Ship(int id,int maxLoad, int dischargePerformanceLimit, int currentLoad) {
+
+    public Ship(int id, int maxLoad, int dischargePerformanceLimit, int currentLoad) {
         this.maxLoad = maxLoad;
         this.dischargePerformanceLimit = dischargePerformanceLimit;
         this.currentLoad = currentLoad;

@@ -1,3 +1,5 @@
-.default-color0.chart-series-line { -fx-stroke: #12e914; }
-.default-color1.chart-series-line { -fx-stroke: #f05438; }
+.default-color0.chart-series-line { -fx-stroke: #12e914; -fx-effect: dropshadow(gaussian, #8d8d8d, 2, 0.5, 2, 2) }
+.default-color1.chart-series-line { -fx-stroke: #f05438; -fx-effect: dropshadow(gaussian, #8d8d8d, 2, 0.5, 2, 2) }
 .default-color2.chart-series-line { -fx-stroke: #dda0dd; }
+
+

@@ -22,7 +22,7 @@ public class SeaPort {
     final static int MIN_DISCHARGE_RATE = 500;
     final static int MAX_DISCHARGE_RATE = 2000;
 
-    Logger log = Logger.getLogger(this.getClass());
+    final Logger log = Logger.getLogger(this.getClass());
     static Random rndGen = new Random();
 
     Dock[] docks;
@@ -101,7 +101,7 @@ public class SeaPort {
             } while (docksFuture.size() > 0);
         };
         scheduledExecutorService.submit(docksMonitor);
-        
+
 //   Start threads manually
 /*
         for (int i=0; i<docks.length; i++){

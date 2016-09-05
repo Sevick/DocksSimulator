@@ -13,4 +13,5 @@ public interface Cargo {
     public void setMaxLoad(int maxLoad) ;
     public int getDischargePerformanceLimit();
     public void setDischargePerformanceLimit(int dischargePerformanceLimit);
+
 }

@@ -11,17 +11,15 @@ import org.apache.log4j.Logger;
 public class DocksSimulator implements StatsProducer {
 
 
-    Logger log=Logger.getLogger(this.getClass());
+    private Logger log=Logger.getLogger(this.getClass());
 
     private int docksCount=5;
     private int shipDelay=400;
     private int dischargeDelay=200;
 
-    SeaPort seaPort=new SeaPort();
-    CargoProducer cargoProducer=new CargoProducer();
+    private SeaPort seaPort=new SeaPort();
+    private CargoProducer cargoProducer=new CargoProducer();
 
-    //CargoProducer.CargoProducerStats cargoProducerStats;
-    //SeaPort.DispatcherStats seaPortStats;
 
     @Override
     public SeaPort.SeaPortStats getSeaPortStats() {

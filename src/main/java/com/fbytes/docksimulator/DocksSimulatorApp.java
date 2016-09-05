@@ -11,8 +11,8 @@ import javafx.stage.WindowEvent;
 
 public class DocksSimulatorApp extends Application{
 
-    DocksSimulator docksSimulator=new DocksSimulator();
-    DocksGraphController graphController;
+    private DocksSimulator docksSimulator=new DocksSimulator();
+    private DocksGraphController graphController;
 
     @Override
     public void start(Stage primaryStage) throws Exception{

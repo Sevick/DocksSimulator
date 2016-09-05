@@ -12,7 +12,10 @@ import javafx.collections.ObservableList;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.chart.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -20,9 +23,11 @@ import javafx.scene.control.Slider;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.paint.Color;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.apache.log4j.Logger;
 
+import java.io.IOException;
 import java.net.URL;
 import java.time.LocalTime;
 import java.util.ResourceBundle;
@@ -34,13 +39,17 @@ public class DocksGraphController implements Initializable {
 
     public int uiUpdateDelay = 500;
 
-    Logger log=Logger.getLogger(this.getClass());
+    private Logger log=Logger.getLogger(this.getClass());
+    StatsProducer statsProducer;
+    DocksSimulator docksSimulator;
 
-    ObservableList<XYChart.Series<Integer, Integer>> lineChartData = FXCollections.observableArrayList();
-    LineChart.Series<Integer, Integer> seriesTotalShipsDischarged = new LineChart.Series<>();
-    LineChart.Series<Integer, Integer> seriesTotalShipsProduced = new LineChart.Series<>();
-    LineChart.Series<Integer, Integer> seriesQueueLength = new LineChart.Series<>();
-    LocalTime startTime;
+    private Thread uiUpdateThread;
+
+    private ObservableList<XYChart.Series<Integer, Integer>> lineChartData = FXCollections.observableArrayList();
+    private LineChart.Series<Integer, Integer> seriesTotalShipsDischarged = new LineChart.Series<>();
+    private LineChart.Series<Integer, Integer> seriesTotalShipsProduced = new LineChart.Series<>();
+    private LineChart.Series<Integer, Integer> seriesQueueLength = new LineChart.Series<>();
+    private LocalTime startTime;
 
 
     @FXML
@@ -82,12 +91,10 @@ public class DocksGraphController implements Initializable {
     @FXML
     private Button buttonDockException;
 
+    @FXML
+    private Button buttonShowStats;
 
-    StatsProducer statsProducer;
-    DocksSimulator docksSimulator;
 
-    ScheduledService<Void> uiUpdateScheduler;
-    Thread uiUpdateThread;
 
 
     public DocksGraphController() {
@@ -110,7 +117,7 @@ public class DocksGraphController implements Initializable {
     @FXML
     @Override // This method is called by the FXMLLoader when initialization is complete
     public void initialize(URL fxmlFileLocation, ResourceBundle resources) {
-        assert exitButton != null : "fx:id=\"okButton\" was not injected: check your FXML file 'view/grpah.fxml'.";
+        assert exitButton != null : "fx:id=\"okButton\" was not injected: check your FXML file 'view/docks.fxml'.";
 
         exitButton.setOnAction((event) -> {
             System.out.println("exitButton button pressed");
@@ -134,6 +141,14 @@ public class DocksGraphController implements Initializable {
             docksSimulator.stopSimulator();
             enableParameterChanges();
             stopUIupdates();
+        });
+
+
+        buttonShowStats.setOnAction((event)->{
+            log.debug("buttonShowStats button pressed");
+            //DocksStatsController docksStatsController=new DocksStatsController();
+            //docksStatsController.showStatsViewer();
+            showStatsViewer();
         });
 
 
@@ -191,8 +206,25 @@ public class DocksGraphController implements Initializable {
         ds.setColor(Color.GRAY);
         seaPortChart.setEffect(ds);
 */
+    }
 
+    public void showStatsViewer() {
+        Parent root;
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/stats.fxml"));
+            root = loader.load();
 
+            Stage stage = new Stage();
+            stage.setTitle("Docks stats");
+            stage.setScene(new Scene(root, 450, 450));
+            stage.show();
+
+            //hide this current window (if this is whant you want
+            //((Node)(event.getSource())).getScene().getWindow().hide();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -221,9 +253,7 @@ public class DocksGraphController implements Initializable {
             CargoProducer.CargoProducerStats cargoProducerStats = statsProducer.getCargoProducerStats();
             SeaPort.SeaPortStats seaPortStats = statsProducer.getSeaPortStats();
 
-            Platform.runLater(new Runnable() {
-                @Override
-                public void run() {
+            Platform.runLater(()->{
                     shipsInQueueLabel.setText(String.valueOf(seaPortStats.queueLength));
 
                     XYChart.Series seriesGraphDischargeRate = new XYChart.Series();
@@ -247,7 +277,6 @@ public class DocksGraphController implements Initializable {
                     seriesQueueLength.getData().add(new XYChart.Data(String.valueOf(timeDelta), (int) seaPortStats.queueLength));
 
                     //log.debug("totalShipsDischarged=" + dispatcherStats.totalShipsDischarged);
-                }
             });
 
 
@@ -260,24 +289,9 @@ public class DocksGraphController implements Initializable {
 
     public void startUIupdates() {
         log.debug("Starting UI updates service");
-/*        uiUpdateScheduler = new ScheduledService<Void>() {
-            protected Task<Void> createTask() {
-                return new Task<Void>() {
-                    protected Void call() {
-                        Thread.currentThread().setName("UIupdate");
-                        updateStats();
-                        return null;
-                    }
-                };
-            }
-        };
-        uiUpdateScheduler.setPeriod(Duration.millis(uiUpdateDelay));
-        uiUpdateScheduler.start();*/
-
-
         Task uiUpdateTask=new Task<Void>() {
                 protected Void call() {
-                    Thread.currentThread().setName("UIupdate");
+                    Thread.currentThread().setName(this.getClass().getName()+"UIupdate");
                     while(true) {
                         updateStats();
                         try {
@@ -292,18 +306,11 @@ public class DocksGraphController implements Initializable {
 
         uiUpdateThread=new Thread(uiUpdateTask);
         uiUpdateThread.start();
-
-        log.info("UIupdate thread started");
+        log.info(this.getClass().getName()+"UIupdate thread started");
     }
 
 
-
-
-
     public void stopUIupdates(){
-/*        if (uiUpdateScheduler!=null)
-            uiUpdateScheduler.cancel();*/
-
         if (uiUpdateThread!=null)
             uiUpdateThread.interrupt();
     }
